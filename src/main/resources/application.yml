@@ -1,0 +1,11 @@
+#spreing:
+ # message:
+  #  basename: i18n\questions_answer.csv
+
+questions:
+  count: 5 #количество вопросов
+  path: C:\Users\User\Desktop\homework\src\main\resources\i18n\questions_answer.csv #путь к CSV
+
+localization: RU #локализация
+#Есть две
+#RU и EN
