@@ -2,11 +2,18 @@ package com.example.homework.CSVhelpers;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+@Repository
+@PropertySource("classpath:application.yml")
 public class CSVhellper implements CSVhellperInterface{
 
     private final List<QA> questionsAnswerList; // хранит вопросы и ответы
@@ -14,10 +21,13 @@ public class CSVhellper implements CSVhellperInterface{
     private Integer questionsNumber = 0; // номер вопроса, который возвращается студенты
     private Integer correctAnswerCount = 0; // количество правильн6ых ответов
 
-    public CSVhellper(String path, Integer questionsCount, String localization) {
+
+    public CSVhellper(@Value("${questions.path}") String path,
+                      @Value("${questions.count}") Integer questionsCount) {
         this.questionsCount = questionsCount;
         questionsAnswerList = new ArrayList<>();
-        init(path, localization); //ради сохранности глаз, лучше не заглядывать!
+
+        init(path); //ради сохранности глаз, лучше не заглядывать!
         //Он просто заполняет поля выше!
     }
 
@@ -40,21 +50,11 @@ public class CSVhellper implements CSVhellperInterface{
         return "You answered " + correctAnswerCount + " out of " + questionsCount + " questions correctly";
     }
 
-    private void init(String path, String localization){
+    private void init(String path){
+
         //Я предупреждал
-        File file;
-        if (Objects.equals(localization, "RU")) file = new File(path);
-        else{
-            StringBuilder builder = new StringBuilder();
-            char[] chars = new char[71];
-            path.getChars(0, 71, chars, 0);
-            builder.append(chars);
-            builder.append("_").append(localization);
-            chars = new char[4];
-            path.getChars(71, path.length(), chars, 0);
-            builder.append(chars);
-            file = new File(builder.toString());
-        }
+
+        File file = new File(path);
         Scanner scanner = null;
         try {
             scanner = new Scanner(file);
@@ -84,6 +84,7 @@ public class CSVhellper implements CSVhellperInterface{
             throw new NullPointerException("file not found");
         }
     }
+
 
     @Data
     @RequiredArgsConstructor

@@ -9,11 +9,11 @@ import org.springframework.context.annotation.*;
 @PropertySource("classpath:application.yml")
 public class AppConfig {
 
-    @Bean
+   /* @Bean  старый варик
     CSVhellperInterface getCSVhellper(@Value("${questions.path}") String path,
                                       @Value("${questions.count}") Integer count,
                                       @Value("${localization}") String localization) {
         return new CSVhellper(path, count, localization);
-    }
+    }*/
 
 }

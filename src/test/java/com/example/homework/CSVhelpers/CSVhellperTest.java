@@ -13,8 +13,8 @@ class CSVhellperTest {
     @BeforeEach
     void getBean(){ // обновляет объект для тестов
         csVhellper = new CSVhellper(
-                "C:\\Users\\User\\Desktop\\homework\\src\\main\\resources\\questions_answer.csv",
-                5, "RU");
+                "C:\\Users\\User\\Desktop\\homework\\src\\main\\resources\\questions_answer_RU.csv",
+                5);
     }
 
 
