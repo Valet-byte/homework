@@ -1,10 +1,6 @@
 package com.example.homework.CSVhelpers;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +17,6 @@ public class CSVhellper implements CSVhellperInterface{
     private Integer questionsNumber = 0; // номер вопроса, который возвращается студенты
     private Integer correctAnswerCount = 0; // количество правильн6ых ответов
 
-
     public CSVhellper(@Value("${questions.path}") String path,
                       @Value("${questions.count}") Integer questionsCount) {
         this.questionsCount = questionsCount;
@@ -34,14 +29,14 @@ public class CSVhellper implements CSVhellperInterface{
     @Override
     public String getNextQuestions() { //Возвращает следующий вопрос
         if (questionsNumber < questionsCount ){
-            return questionsAnswerList.get(questionsNumber).getQUESTIONS();
+            return questionsAnswerList.get(questionsNumber).QUESTIONS();
         }
         else return null;
     }
 
     @Override
     public void setAnswer(String answer) { // проверяет вопрос
-        if(questionsAnswerList.get(questionsNumber).getANSWER().equals(answer + " " /* пробел тут обязателен */))  correctAnswerCount++;
+        if(questionsAnswerList.get(questionsNumber).ANSWER().equals(answer + " " /* пробел тут обязателен */))  correctAnswerCount++;
         questionsNumber++;
     }
 
@@ -50,7 +45,13 @@ public class CSVhellper implements CSVhellperInterface{
         return "You answered " + correctAnswerCount + " out of " + questionsCount + " questions correctly";
     }
 
-    private void init(String path){
+    @Override
+    public void restart() {
+        correctAnswerCount = 0;
+        questionsNumber = 0;
+    }
+
+    private void init(String path) {
 
         //Я предупреждал
 
@@ -78,6 +79,7 @@ public class CSVhellper implements CSVhellperInterface{
                 questionsAnswerList.add(new QA(q.toString(), a.toString()));
                 q = new StringBuilder();
                 a = new StringBuilder();
+
             }
             scanner.close();
         } else {
@@ -85,11 +87,6 @@ public class CSVhellper implements CSVhellperInterface{
         }
     }
 
-
-    @Data
-    @RequiredArgsConstructor
-    private static class QA{ // хранит пару вопрос - ответ
-        private final String QUESTIONS;
-        private final String ANSWER;
-    }
+    private record QA(String QUESTIONS, String ANSWER) { /* хранит пару вопрос - ответ */}
 }
+
