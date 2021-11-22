@@ -1,11 +1,11 @@
-spreing:
-  message:
-   basename: i18n\questions_answer
+spring:
+  messages:
+    basename: i18n/messages
+  main:
+    lazy-initialization: true
 
 questions:
-  count: 5 #количество вопросов
-  path: src\main\resources\i18n\questions_answer_${localization}.csv #путь к CSV
-
-localization: RU #локализация
-#Есть две
-#RU и EN
+  path:
+    RU: src\main\resources\questions\questions_answer_RU.csv
+    EN: src\main\resources\questions\questions_answer_EN.csv
+  #путь к CSV

@@ -1,11 +1,18 @@
 package com.example.homework.CSVhelpers;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.example.homework.exception.FailedToFindFileWithTheRequiredLocalizationException;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.ResourceUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 @Repository
@@ -13,17 +20,16 @@ import java.util.*;
 public class CSVhellper implements CSVhellperInterface{
 
     private final List<QA> questionsAnswerList; // хранит вопросы и ответы
-    private final Integer questionsCount; // количество вопросов
-    private Integer questionsNumber = 0; // номер вопроса, который возвращается студенты
-    private Integer correctAnswerCount = 0; // количество правильн6ых ответов
+    @Getter
+    private int questionsCount = 0; // количество вопросов
+    private int questionsNumber = 0; // номер вопроса, который возвращается студенту
+    @Getter
+    private int correctAnswerCount = 0; // количество правильн6ых ответов
+    private final Environment environment;
 
-    public CSVhellper(@Value("${questions.path}") String path,
-                      @Value("${questions.count}") Integer questionsCount) {
-        this.questionsCount = questionsCount;
+    public CSVhellper(@Autowired Environment environment) {
+        this.environment = environment;
         questionsAnswerList = new ArrayList<>();
-
-        init(path); //ради сохранности глаз, лучше не заглядывать!
-        //Он просто заполняет поля выше!
     }
 
     @Override
@@ -36,13 +42,8 @@ public class CSVhellper implements CSVhellperInterface{
 
     @Override
     public void setAnswer(String answer) { // проверяет вопрос
-        if(questionsAnswerList.get(questionsNumber).ANSWER().equals(answer + " " /* пробел тут обязателен */))  correctAnswerCount++;
+        if(questionsAnswerList.get(questionsNumber).ANSWER().equals(answer))  correctAnswerCount++;
         questionsNumber++;
-    }
-
-    @Override
-    public String getResult() { // возвращает результат
-        return "You answered " + correctAnswerCount + " out of " + questionsCount + " questions correctly";
     }
 
     @Override
@@ -51,42 +52,30 @@ public class CSVhellper implements CSVhellperInterface{
         questionsNumber = 0;
     }
 
-    private void init(String path) {
-
-        //Я предупреждал
-
-        File file = new File(path);
-        Scanner scanner = null;
+    @SneakyThrows
+    private void init(String local){
         try {
-            scanner = new Scanner(file);
-        } catch (FileNotFoundException ignored) {}
-
-        if (scanner != null){
-            StringBuilder q = new StringBuilder();
-            StringBuilder a = new StringBuilder();
-            String temp;
-            for (int i = 0; i < questionsCount; i++) {
-                temp = scanner.next();
-                while (!temp.equals(",")){
-                    q.append(temp).append(" ");
-                    temp = scanner.next();
-                }
-                temp = scanner.next();
-                while (!temp.equals(";")){
-                    a.append(temp).append(" ");
-                    temp = scanner.next();
-                }
-                questionsAnswerList.add(new QA(q.toString(), a.toString()));
-                q = new StringBuilder();
-                a = new StringBuilder();
-
+            questionsAnswerList.clear();
+            restart();
+            File file = ResourceUtils.getFile(Objects.requireNonNull(environment.getProperty("questions.path." + local)));
+            FileInputStream stream = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            String csvLine;
+            while ((csvLine = reader.readLine()) != null){
+                String[] employ = csvLine.split(",");
+                questionsAnswerList.add(new QA(employ[0], employ[1]));
+                questionsCount++;
             }
-            scanner.close();
-        } else {
-            throw new NullPointerException("file not found");
+        } catch (Exception e){
+            throw new FailedToFindFileWithTheRequiredLocalizationException();
         }
+
     }
 
-    private record QA(String QUESTIONS, String ANSWER) { /* хранит пару вопрос - ответ */}
+    public void setLocal(String local) throws FailedToFindFileWithTheRequiredLocalizationException {
+        init(local);
+    }
+
+    private record QA(String QUESTIONS, String ANSWER){} /* хранит пару вопрос - ответ */
 }
 

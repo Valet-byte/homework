@@ -4,7 +4,6 @@ public interface CSVhellperInterface {
 
     String getNextQuestions();
     void setAnswer(String answer);
-    String getResult();
     void restart();
 
 }
